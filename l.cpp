@@ -1,4 +1,4 @@
-﻿﻿#include <iostream>
+﻿#include <iostream>
 #include <algorithm>
 #include <bitset>
 #include <vector>
@@ -105,15 +105,7 @@ struct LLong {
 	}
 };
 
-int main()
-{
-	int n, m;
-	std::cin >> n >> m;
-	n /= 2;
-
-	std::vector<std::vector<LLong> > combs(n + 1, std::vector<LLong>(n * (m - 1) + 1));
-	combs[0][0] = 1;
-
+void fillDp(int n, int m, std::vector<std::vector<LLong> >& combs) {
 	for (int len = 1; len <= n; ++len) {
 		for (int sum = 0; sum <= len * (m - 1); ++sum) {
 			for (int k = 0; k < m; ++k) {
@@ -122,21 +114,41 @@ int main()
 			}
 		}
 	}
+}
+
+LLong getTicketCount(int n, int m) {
+	std::vector<std::vector<LLong> > combs(n + 1, std::vector<LLong>(n * (m - 1) + 1));
+	combs[0][0] = 1;
+
+	fillDp(n, m, combs);
 
 	LLong sqs_sum = 0;
 	for (int s = 0; s <= n * (m - 1); ++s) {
 		sqs_sum += combs[n][s].square();
 	}
+	return sqs_sum;
+}
 
+void coutLLong(LLong& value) {
 	std::vector<char> digits;
-	while (!sqs_sum.data.empty()) {
-		digits.push_back(sqs_sum.get_digit(10) + '0');
+	while (!value.data.empty()) {
+		digits.push_back(value.get_digit(10) + '0');
 	}
 
 	while (!digits.empty()) {
 		std::cout << digits.back();
 		digits.pop_back();
 	}
+}
+
+int main()
+{
+	int n, m;
+	std::cin >> n >> m;
+	n /= 2;
+
+	LLong sqs_sum = getTicketCount(n, m);
+	coutLLong(sqs_sum);
 	std::cout << '\n';
 	return 0;
 }
