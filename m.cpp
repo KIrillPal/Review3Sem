@@ -2,12 +2,20 @@
 #include <vector>
 #include <string>
 
-int main() {
-	const int MAXN = 1000;
-	const int MAXDIST = 2 * MAXN;
+#define MAXN 1000
+#define MAXDIST 2000
 
-	std::string s1, s2;
-	std::cin >> s1 >> s2;
+inline void relaxDp(int i, int j, int dist[MAXN + 1][MAXN + 1], bool add_char_flag) {
+	dist[i][j] = MAXDIST;
+	if (i > 0)
+		dist[i][j] = std::min(dist[i][j], dist[i - 1][j] + 1);
+	if (j > 0)
+		dist[i][j] = std::min(dist[i][j], dist[i][j - 1] + 1);
+	if (i && j)
+		dist[i][j] = std::min(dist[i][j], dist[i - 1][j - 1] + add_char_flag);
+}
+
+int solve(const std::string& s1, const std::string& s2) {
 
 	int dist[MAXN + 1][MAXN + 1];
 
@@ -18,16 +26,17 @@ int main() {
 				dist[i][j] = 0;
 				continue;
 			}
-			dist[i][j] = MAXDIST;
-			if (i > 0)
-				dist[i][j] = std::min(dist[i][j], dist[i - 1][j] + 1);
-			if (j > 0)
-				dist[i][j] = std::min(dist[i][j], dist[i][j - 1] + 1);
-			if (i && j)
-				dist[i][j] = std::min(dist[i][j], dist[i - 1][j - 1] + (s1[i - 1] != s2[j - 1]));
+			int add_char_flag = (i && j) ? s1[i-1] != s2[j-1] : 0;
+			relaxDp(i, j, dist, add_char_flag);
 		}
 	}
 
-	std::cout << dist[s1.size()][s2.size()] << '\n';
+	return dist[s1.size()][s2.size()];
+}
+
+int main() {
+	std::string s1, s2;
+	std::cin >> s1 >> s2;
+	std::cout << solve(s1, s2) << '\n';
 	return 0;
 }
