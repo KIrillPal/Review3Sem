@@ -1,29 +1,28 @@
-﻿﻿#include <iostream>
+﻿#include <iostream>
 #include <algorithm>
 #include <bitset>
 #include <vector>
 
+#define MAX_M 1000
+#define MAX_N 150
+
 typedef unsigned long long ull;
-
-int main()
-{
-	int n, m;
-	std::cin >> n >> m;
-	int costs[1000][150];
-	int best_cost[1001][150];
-	int best_from[1001][150];
-
+void readCosts(int n, int m, int costs[MAX_M][MAX_N]) {
 	for (int i = 0; i < n; ++i) {
 		for (int j = 0; j < m; ++j) {
 			std::cin >> costs[j][i];
 		}
 	}
+}
 
+void prepareDp(int n, int best_cost[MAX_M + 1][MAX_N], int best_from[MAX_M + 1][MAX_N]) {
 	for (int i = 0; i < n; ++i) {
 		best_cost[0][i] = 0;
 		best_from[0][i] = 0;
 	}
+}
 
+void fillDp(int n, int m, int best_cost[MAX_M + 1][MAX_N], int best_from[MAX_M + 1][MAX_N], int costs[MAX_M][MAX_N]) {
 	for (int j = 1; j <= m; ++j) {
 		for (int i = 0; i < n; ++i) {
 			int minc = 1e9 + 7;
@@ -46,9 +45,11 @@ int main()
 			best_from[j][i] = minf;
 		}
 	}
+}
 
-	int ans_cost = best_cost[m][0];
+int getAnsFromDp(int n, int m, int best_cost[MAX_M + 1][MAX_N], int& ans_cost) {
 	int ans_i = 0;
+	ans_cost = best_cost[m][0];
 
 	for (int i = 1; i < n; ++i) {
 		if (ans_cost > best_cost[m][i]) {
@@ -56,17 +57,40 @@ int main()
 			ans_i = i;
 		}
 	}
+	return ans_i;
+}
 
-	std::vector<int> ans_cities(m);
+void reconstructPath(int m, int best_from[MAX_M + 1][MAX_N], std::vector<int>& ans_cities, int ans_i) {
 	for (int j = m - 1; j >= 0; --j) {
 		ans_cities[j] = ans_i + 1;
 		ans_i = best_from[j + 1][ans_i];
 	}
+}
 
+void outAnswer(int m, const std::vector<int>& ans_cities, int ans_cost) {
 	for (int j = 0; j < m; ++j) {
 		std::cout << ans_cities[j] << ' ';
 	}
-
 	std::cout << '\n' << ans_cost << '\n';
+}
+
+int main()
+{
+	int n, m;
+	std::cin >> n >> m;
+	int costs[MAX_M][MAX_N];
+	int best_cost[MAX_M + 1][MAX_N];
+	int best_from[MAX_M + 1][MAX_N];
+
+	readCosts(n, m, costs);
+	prepareDp(n, best_cost, best_from);
+	fillDp(n, m, best_cost, best_from, costs);
+	int ans_cost;
+	int ans_i = getAnsFromDp(n, m, best_cost, ans_cost);
+
+	std::vector<int> ans_cities(m);
+	reconstructPath(m, best_from, ans_cities, ans_i);
+	outAnswer(m, ans_cities, ans_cost);
+	
 	return 0;
 }
